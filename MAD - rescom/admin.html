@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RESCOM Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #4a6fa5;
+      --primary-light: #6b8cbc;
+      --primary-dark: #3a5682;
+      --secondary: #7bb3b1;
+      --accent: #f9a826;
+      --light: #f8f9fa;
+      --light-gray: #e9ecef;
+      --medium-gray: #adb5bd;
+      --dark: #343a40;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { margin:0; background-color:#f5f7fa; color: var(--dark); }
+    .container { width:100%; max-width:1200px; margin:0 auto; padding: 0 20px; }
+    .header { background: white; box-shadow: var(--shadow); padding: 15px 0; position: sticky; top: 0; z-index: 100; margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between; }
+    .header .title { font-size: 1.4rem; font-weight: 700; color: var(--primary); }
+    .header .row { display:flex; gap:10px; margin-left:auto; }
+
+    .card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .row { display:flex; gap:10px; }
+    .vstack { display:flex; flex-direction: column; gap:10px; }
+    .section-title { font-weight:600; margin-bottom: 8px; }
+    input, select { background: white; color: var(--dark); border:1px solid var(--light-gray); border-radius: var(--radius); padding: 12px 12px; outline:none; width:100%; }
+    input::placeholder { color: var(--medium-gray); }
+    label { font-size: 0.95rem; color: var(--dark); }
+
+    .btn { background: var(--primary); color: white; border:none; border-radius: var(--radius); padding: 10px 14px; cursor:pointer; font-weight:600; transition: all 0.2s ease; }
+    .btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { filter: brightness(0.95); }
+    .btn-secondary { background: var(--light-gray); color: var(--dark); }
+    .btn-secondary:hover { background: var(--medium-gray); color: white; }
+
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding: 12px 14px; text-align:left; border-bottom:1px solid var(--light-gray); font-size: 0.95rem; }
+    th { background: var(--light); color: var(--primary); font-weight: 600; }
+    .muted { color: var(--medium-gray); font-size: 0.9rem; }
+    .right { text-align:right; }
+    .pill { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display:inline-block; }
+    .pill.on { background: #d4edda; color: #155724; }
+    .pill.off { background: #f8d7da; color: #721c24; }
+    .auth { max-width: 520px; margin: 60px auto; }
+    .spacer { height: 10px; }
+    .toolbar { display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loginView" class="auth card container">
+    <div class="title" style="margin-bottom:12px;">RESCOM Admin Login</div>
+    <div class="spacer"></div>
+    <div class="row"><input id="adminUser" placeholder="Username" /></div>
+    <div class="row"><input id="adminPass" type="password" placeholder="Password" /></div>
+    <div class="row"><button id="adminLoginBtn" class="btn" style="width:100%">Login</button></div>
+    <div id="loginError" class="muted" style="color:#ef4444; display:none;">Invalid credentials</div>
+  </div>
+
+  <div id="adminView" class="container" style="display:none;">
+    <div class="header">
+      <div class="title">RESCOM Admin Dashboard</div>
+      <div class="row">
+        <button id="logoutBtn" class="btn-danger btn"><i class="fas fa-sign-out"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="row" style="gap:12px; margin-bottom:14px;">
+      <button class="btn-secondary btn" id="tabBtnOrganizations">Organizations</button>
+      <button class="btn-secondary btn" id="tabBtnReporters">Reporters</button>
+      <button class="btn-secondary btn" id="tabBtnVolunteers">Volunteers</button>
+    </div>
+
+    <div class="grid" id="tabOrganizations" style="display:block;">
+      <div class="card">
+        <div class="toolbar">
+          <div class="section-title">Organizations</div>
+        </div>
+        <div class="vstack" style="margin-bottom:12px;">
+          <input id="orgName" placeholder="Name" />
+          <textarea id="orgDescription" placeholder="Description" style="min-height:80px; padding:12px; resize:vertical;"></textarea>
+          <input id="orgAddress" placeholder="Address" />
+          <input id="orgEmail" placeholder="Contact Email" />
+          <input id="orgPhone" placeholder="Contact Phone" />
+          <select id="orgActive">
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+          <div class="muted">Coordinates are auto-filled in the backend from the address.</div>
+          <div class="row" style="justify-content:flex-end; gap:8px;">
+            <button id="addOrgBtn" class="btn"><i class="fas fa-plus"></i> Add Organization</button>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th class="right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orgTable"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="grid" id="tabReporters" style="display:none;">
+      <div class="card">
+        <div class="toolbar"><div style="font-weight:600;">Users / Reporters</div></div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Credits</th>
+            </tr>
+          </thead>
+          <tbody id="userTable"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="grid" id="tabVolunteers" style="display:none;">
+      <div class="card">
+        <div class="toolbar"><div style="font-weight:600;">Volunteers</div></div>
+        <div class="vstack" style="margin-bottom:12px;">
+          <input id="volUser" placeholder="Volunteer Username" />
+          <input id="volPass" type="password" placeholder="Password (set by admin)" />
+          <select id="volOrg"></select>
+          <select id="volActive">
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+          <div class="row" style="justify-content:flex-end; gap:8px;">
+            <button id="addVolBtn" class="btn"><i class="fas fa-user-plus"></i> Add Volunteer</button>
+          </div>
+        </div>
+        <div class="muted" id="volFilterInfo" style="margin:-4px 0 8px 0;"></div>
+        <div class="spacer"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Organization</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="volTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiBase = './api';
+    let authToken = localStorage.getItem('rescom_admin_token');
+
+    function apiFetch(path, options = {}) {
+      const headers = options.headers || {};
+      headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+      return fetch(`${apiBase}/${path}`, { ...options, headers });
+    }
+    function handle(res){ if(!res.ok) return res.json().then(d=>{throw d}); return res.json(); }
+
+    function showLogin(){ document.getElementById('loginView').style.display='block'; document.getElementById('adminView').style.display='none'; }
+    function showAdmin(){ document.getElementById('loginView').style.display='none'; document.getElementById('adminView').style.display='block'; }
+
+    function login(){
+      const username = document.getElementById('adminUser').value.trim();
+      const password = document.getElementById('adminPass').value;
+      apiFetch('auth.php', { method:'POST', body: JSON.stringify({ action:'admin_login', username, password }) })
+        .then(handle)
+        .then(d=>{
+          authToken = d.token; localStorage.setItem('rescom_admin_token', authToken);
+          loadAll(); showAdmin();
+        })
+        .catch(err=>{
+          const el = document.getElementById('loginError');
+          if (el) {
+            el.textContent = (err && err.error) || 'Invalid credentials';
+            el.style.display = 'block';
+          }
+          console.error('Admin login failed:', err);
+        });
+    }
+
+    function logout(){ authToken=null; localStorage.removeItem('rescom_admin_token'); showLogin(); }
+
+    function loadAll(){ loadOrganizations(); loadUsers(); loadVolunteers(); }
+
+    function loadOrganizations(){
+      apiFetch('admin.php?action=organizations').then(handle).then(d=>{
+        const tbody = document.getElementById('orgTable');
+        tbody.innerHTML='';
+        const volOrg = document.getElementById('volOrg');
+        if (volOrg) { volOrg.innerHTML = ''; }
+        (d.organizations||[]).forEach(o=>{
+          let contact = '';
+          if (o.contact_info) {
+            try {
+              const ci = JSON.parse(o.contact_info);
+              const email = ci.email || '';
+              const phone = ci.phone || '';
+              contact = [email, phone].filter(Boolean).join(' | ');
+            } catch(e) { contact = o.contact_info; }
+          }
+          const tr = document.createElement('tr');
+          tr.style.cursor = 'pointer';
+          const active = (o.is_active === 1) || (o.is_active === '1') || (o.is_active === true);
+          tr.innerHTML = `
+            <td>${o.id}</td>
+            <td>${o.name}</td>
+            <td>${o.address||''}</td>
+            <td class="muted">${contact||''}</td>
+            <td><span class="pill ${active? 'on':'off'}">${active? 'Active':'Inactive'}</span></td>
+            <td class="right"><button class="btn-danger btn" data-del="${o.id}"><i class="fas fa-trash"></i></button></td>
+          `;
+          tbody.appendChild(tr);
+          tr.addEventListener('click', (e)=>{
+            const delBtn = e.target.closest('[data-del]');
+            if (delBtn) return; // ignore delete button clicks
+            switchTab('volunteers');
+            loadVolunteers(o.name);
+          });
+
+          if (volOrg && active) {
+            const opt = document.createElement('option');
+            opt.value = o.name;
+            opt.textContent = o.name;
+            volOrg.appendChild(opt);
+          }
+        });
+        // bind delete buttons
+        tbody.querySelectorAll('[data-del]').forEach(btn=>{
+          btn.addEventListener('click',()=> deleteOrganization(btn.getAttribute('data-del')));
+        });
+      });
+    }
+
+    function loadVolunteers(orgName){
+      apiFetch('admin.php?action=volunteers').then(handle).then(d=>{
+        const tbody = document.getElementById('volTable');
+        if (!tbody) return;
+        tbody.innerHTML='';
+        const list = (d.volunteers||[]).filter(v => !orgName || v.organization === orgName);
+        const info = document.getElementById('volFilterInfo');
+        if (info) info.textContent = orgName ? `Filtered by organization: ${orgName}` : '';
+        list.forEach(v=>{
+          const tr = document.createElement('tr');
+          const active = (v.is_active === 1) || (v.is_active === '1') || (v.is_active === true);
+          tr.innerHTML = `
+            <td>${v.id}</td>
+            <td>${v.username}</td>
+            <td>${v.organization}</td>
+            <td><span class="pill ${active? 'on':'off'}">${active? 'Active':'Inactive'}</span></td>
+            <td>${v.created_at||''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function addVolunteer(){
+      const username = document.getElementById('volUser').value.trim();
+      const password = document.getElementById('volPass').value;
+      const organization = document.getElementById('volOrg').value;
+      const is_active = document.getElementById('volActive').value;
+      if(!username){ alert('Username is required'); return; }
+      if(!password){ alert('Password is required'); return; }
+      if(!organization){ alert('Organization is required'); return; }
+      const body = { username, password, organization, is_active };
+      apiFetch('admin.php?action=volunteers', { method:'POST', body: JSON.stringify(body) })
+        .then(handle)
+        .then(()=>{ document.getElementById('volUser').value=''; document.getElementById('volPass').value=''; loadVolunteers(); })
+        .catch(err=> alert(err.error||'Failed to add volunteer'));
+    }
+
+    function addOrganization(){
+      const name = document.getElementById('orgName').value.trim();
+      const description = document.getElementById('orgDescription').value.trim();
+      const address = document.getElementById('orgAddress').value.trim();
+      const email = document.getElementById('orgEmail').value.trim();
+      const phone = document.getElementById('orgPhone').value.trim();
+      const is_active = document.getElementById('orgActive').value;
+      // basic client-side validation to improve UX
+      if(!name){ alert('Name is required'); return; }
+      if(!description){ alert('Description is required'); return; }
+      if(!address){ alert('Address is required'); return; }
+      if(!email){ alert('Email is required'); return; }
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!emailRe.test(email)) { alert('Enter a valid email'); return; }
+      if(!phone){ alert('Phone is required'); return; }
+      const phoneRe = /^[0-9+\-\s]{7,20}$/;
+      if(!phoneRe.test(phone)) { alert('Enter a valid phone number'); return; }
+
+      const body = { name, description, address, email, phone, is_active };
+      apiFetch('admin.php?action=organizations', { method:'POST', body: JSON.stringify(body) })
+        .then(handle)
+        .then(()=>{ clearOrgForm(); loadOrganizations(); })
+        .catch(err=> alert(err.error||'Failed to add organization'));
+    }
+
+    function clearOrgForm(){
+      ['orgName','orgDescription','orgAddress','orgEmail','orgPhone'].forEach(id=> document.getElementById(id).value='');
+      document.getElementById('orgActive').value = '1';
+    }
+
+    function deleteOrganization(id){
+      if(!confirm('Delete this organization?')) return;
+      apiFetch('admin.php?action=organizations&id='+encodeURIComponent(id), { method:'DELETE' })
+        .then(handle)
+        .then(()=> loadOrganizations())
+        .catch(err=> alert(err.error||'Failed to delete'));
+    }
+
+    function loadUsers(){
+      apiFetch('admin.php?action=users').then(handle).then(d=>{
+        const tbody = document.getElementById('userTable');
+        tbody.innerHTML='';
+        (d.users||[]).forEach(u=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${u.id}</td>
+            <td>${u.username||''}</td>
+            <td>${u.email||''}</td>
+            <td>${u.mobile||''}</td>
+            <td>${u.credit_points??0}</td>
+          `;
+          tbody.appendChild(tr);
+        })
+      });
+    }
+
+    // events
+    document.getElementById('adminLoginBtn').addEventListener('click', login);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('addOrgBtn').addEventListener('click', addOrganization);
+    const addVolBtn = document.getElementById('addVolBtn'); if (addVolBtn) addVolBtn.addEventListener('click', addVolunteer);
+
+    function switchTab(name){
+      const tabs = ['Organizations','Reporters','Volunteers'];
+      tabs.forEach(t=>{
+        const pane = document.getElementById('tab'+t);
+        const btn = document.getElementById('tabBtn'+t);
+        if (pane) pane.style.display = (t.toLowerCase()===name)?'block':'none';
+        if (btn) btn.classList.toggle('btn', t.toLowerCase()===name);
+        if (btn) btn.classList.toggle('btn-secondary', t.toLowerCase()!==name);
+      });
+      if (name==='organizations') loadOrganizations();
+      if (name==='reporters') loadUsers();
+      if (name==='volunteers') loadVolunteers();
+    }
+    document.getElementById('tabBtnOrganizations').addEventListener('click', ()=> switchTab('organizations'));
+    document.getElementById('tabBtnReporters').addEventListener('click', ()=> switchTab('reporters'));
+    document.getElementById('tabBtnVolunteers').addEventListener('click', ()=> switchTab('volunteers'));
+
+    // bootstrap
+    if (authToken) { showAdmin(); loadAll(); } else { showLogin(); }
+  </script>
+</body>
+</html>

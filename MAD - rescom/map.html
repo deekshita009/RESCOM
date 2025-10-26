@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nearby Hospitals, NGOs & Trusts</title>
+  
+  <!-- TomTom Maps SDK for Web -->
+  <link rel="stylesheet" href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.19.0/maps/maps.css">
+  <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.19.0/maps/maps-web.min.js"></script>
+  <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.19.0/services/services-web.min.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+    }
+    
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    
+    #panel {
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      background: #fff;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 10;
+      width: 340px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+    
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    
+    .category-selector {
+      margin-bottom: 15px;
+    }
+    
+    .category-checkbox {
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .category-checkbox input {
+      margin-right: 8px;
+    }
+    
+    button {
+      background: #0078d7;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      width: 100%;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+    
+    button:hover {
+      background: #005ea0;
+    }
+    
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    .info-window {
+      max-width: 250px;
+    }
+    
+    .info-window h3 {
+      margin-bottom: 8px;
+      color: #333;
+    }
+    
+    .info-window p {
+      margin-bottom: 10px;
+      color: #666;
+    }
+    
+    .route-btn {
+      background: #28a745;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+    }
+    
+    .route-btn:hover {
+      background: #218838;
+    }
+    
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      color: #0078d7;
+    }
+    
+    #routeInfo {
+      display: none;
+      margin-top: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #0078d7;
+    }
+    
+    #routeInfo h4 {
+      margin-bottom: 8px;
+      color: #333;
+    }
+    
+    #routeInfo p {
+      margin-bottom: 5px;
+      color: #555;
+    }
+    
+    .clear-route {
+      background: #dc3545;
+      margin-top: 10px;
+    }
+    
+    .clear-route:hover {
+      background: #c82333;
+    }
+    
+    .legend {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+    
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .search-row input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .search-results {
+      margin-top: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      display: none;
+    }
+    .search-item {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f1f1;
+      cursor: pointer;
+    }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: #f5f9ff; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .secondary-btn {
+      background: #6c757d;
+    }
+    .secondary-btn:hover {
+      background: #5a6268;
+    }
+    .reset-btn {
+      background: #17a2b8;
+    }
+    .reset-btn:hover {
+      background: #117a8b;
+    }
+
+    .back-btn {
+      background: #343a40;
+      margin-bottom: 10px;
+    }
+    .back-btn:hover {
+      background: #23272b;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e9ecef;
+      color: #333;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .close-btn:hover { background: #dee2e6; }
+
+    .back-top-btn {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 11;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #343a40;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .back-top-btn:hover { background: #23272b; }
+
+    .toggle-panel-btn {
+      position: absolute;
+      top: 56px;
+      left: 12px;
+      z-index: 11;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #0d6efd;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .toggle-panel-btn:hover { background: #0b5ed7; }
+
+    @media (max-width: 640px) {
+      #panel {
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 40px);
+      }
+      .legend {
+        right: 20px;
+        left: auto;
+        bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="backTopBtn" class="back-top-btn" title="Back">←</button>
+  <button id="togglePanelBtn" class="toggle-panel-btn" title="Toggle panel">☰</button>
+  <div id="panel">
+    <button id="closePanelBtn" class="close-btn" title="Close">×</button>
+    <h1>Nearby Facilities</h1>
+    
+    <div class="category-selector">
+      <div class="category-checkbox">
+        <input type="checkbox" id="hospital" checked>
+        <label for="hospital">Hospitals</label>
+      </div>
+      <div class="category-checkbox">
+        <input type="checkbox" id="vet" checked>
+        <label for="vet">Veterinary Clinics</label>
+      </div>
+      <div class="category-checkbox">
+        <input type="checkbox" id="ngo" checked>
+        <label for="ngo">NGOs</label>
+      </div>
+      <div class="category-checkbox">
+        <input type="checkbox" id="trust" checked>
+        <label for="trust">Trusts</label>
+      </div>
+    </div>
+    
+    <button id="findBtn">Find Nearby Locations</button>
+
+    <div class="search-row">
+      <input id="searchInput" type="text" placeholder="Search place or address..." />
+      <button id="searchBtn" class="secondary-btn">Search</button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+
+    <div class="toolbar">
+      <button id="globalViewBtn" class="secondary-btn">Global View</button>
+      <button id="resetViewBtn" class="reset-btn">Reset View</button>
+    </div>
+    
+    <div id="loading">Searching for nearby facilities...</div>
+    
+    <div id="routeInfo">
+      <h4>Route Information</h4>
+      <p id="routeDistance"></p>
+      <p id="routeDuration"></p>
+      <button class="clear-route">Clear Route</button>
+    </div>
+  </div>
+  
+  <div id="map"></div>
+  
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #0078d7;"></div>
+      <span>Your Location</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #dc3545;"></div>
+      <span>Hospitals</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #28a745;"></div>
+      <span>Veterinary Clinics</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #ffc107;"></div>
+      <span>NGOs</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #6f42c1;"></div>
+      <span>Trusts</span>
+    </div>
+  </div>
+
+  <script>
+    // IMPORTANT: Replace with your actual TomTom API key
+    const TOMTOM_API_KEY = "hDgeIelFzyZIB9l1VloQjj1zCUgEdcJM";
+    
+    let map;
+    let userLocation;
+    let userMarker;
+    let markers = [];
+    let routeSourceId = 'route-source';
+    let routeLayerId = 'route-layer';
+    let searchMarker;
+    
+    let selectedCategories = {
+      hospital: true,
+      vet: true,
+      ngo: true,
+      trust: true
+    };
+    
+    // Initialize map
+    function initMap(lat, lng) {
+      map = tt.map({
+        key: TOMTOM_API_KEY,
+        container: 'map',
+        center: [lng, lat],
+        zoom: 13
+      });
+      map.addControl(new tt.FullscreenControl());
+      map.addControl(new tt.NavigationControl());
+
+      // Add user location marker with popup
+      const userEl = document.createElement('div');
+      userEl.innerHTML = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" fill="#0078d7" stroke="white" stroke-width="2"/></svg>`;
+      userMarker = new tt.Marker({ element: userEl })
+        .setLngLat([lng, lat])
+        .addTo(map);
+
+      const userPopup = new tt.Popup({ offset: 35 }).setHTML('<h3>Your Location</h3>');
+      userMarker.setPopup(userPopup);
+    }
+    
+    // Get user's location
+    function getUserLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            userLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            initMap(userLocation.lat, userLocation.lng);
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            alert("Unable to get your location. Using default location.");
+            // Default to a central location if geolocation fails
+            userLocation = { lat: 40.7128, lng: -74.0060 }; // New York City
+            initMap(userLocation.lat, userLocation.lng);
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by this browser.");
+        userLocation = { lat: 40.7128, lng: -74.0060 }; // New York City
+        initMap(userLocation.lat, userLocation.lng);
+      }
+    }
+    
+    // Find nearby places based on selected categories
+    async function findNearby() {
+      if (!userLocation) {
+        alert("Location not available yet. Please wait.");
+        return;
+      }
+      
+      // Show loading indicator
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("findBtn").disabled = true;
+      
+      // Clear existing markers
+      clearMarkers();
+      
+      // Update selected categories
+      updateSelectedCategories();
+      
+      // Define search parameters for each category
+      const categories = [
+        { 
+          id: "hospital", 
+          name: "Hospitals", 
+          color: "#dc3545",
+          keyword: "hospital"
+        },
+        { 
+          id: "vet", 
+          name: "Veterinary Clinics", 
+          color: "#28a745",
+          keyword: "veterinary"
+        },
+        { 
+          id: "ngo", 
+          name: "NGOs", 
+          color: "#ffc107",
+          keyword: "NGO non-profit organization"
+        },
+        { 
+          id: "trust", 
+          name: "Trusts", 
+          color: "#6f42c1",
+          keyword: "trust foundation"
+        }
+      ];
+      
+      // Perform searches for selected categories
+      for (const category of categories) {
+        if (selectedCategories[category.id]) {
+          await performSearch(category);
+        }
+      }
+      
+      // Hide loading indicator
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("findBtn").disabled = false;
+    }
+    
+    // Perform search for a specific category
+    function performSearch(category) {
+      const { lat, lng } = userLocation;
+      const url = `https://api.tomtom.com/search/2/search/${encodeURIComponent(category.keyword)}.json?key=${TOMTOM_API_KEY}&lat=${lat}&lon=${lng}&radius=10000&limit=10`;
+      return fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data && Array.isArray(data.results)) {
+            data.results.forEach(r => addMarker(r, category));
+          }
+        })
+        .catch(() => {})
+    }
+
+    // Search bar - search any place and allow routing
+    function searchLocation() {
+      const q = document.getElementById('searchInput').value.trim();
+      const resultsEl = document.getElementById('searchResults');
+      resultsEl.innerHTML = '';
+      resultsEl.style.display = 'none';
+      if (!q) return;
+      const center = map.getCenter();
+      const url = `https://api.tomtom.com/search/2/search/${encodeURIComponent(q)}.json?key=${TOMTOM_API_KEY}&lat=${center.lat}&lon=${center.lng}&limit=5`;
+      fetch(url)
+        .then(r => r.json())
+        .then(d => {
+          if (!d || !Array.isArray(d.results) || d.results.length === 0) return;
+          const frag = document.createDocumentFragment();
+          d.results.forEach((res, idx) => {
+            const name = (res.poi && res.poi.name) || (res.address && res.address.freeformAddress) || q;
+            const addr = (res.address && res.address.freeformAddress) || '';
+            const item = document.createElement('div');
+            item.className = 'search-item';
+            item.textContent = `${name} — ${addr}`;
+            item.addEventListener('click', () => focusSearchResult(res));
+            frag.appendChild(item);
+          });
+          resultsEl.appendChild(frag);
+          resultsEl.style.display = 'block';
+        })
+        .catch(() => {});
+    }
+
+    function focusSearchResult(res) {
+      const { position, poi, address } = res;
+      const name = (poi && poi.name) || (address && address.freeformAddress) || 'Location';
+      if (!position) return;
+      // Clear previous search marker
+      if (searchMarker) searchMarker.remove();
+      const el = document.createElement('div');
+      el.innerHTML = `<svg width="22" height="22" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="9" fill="#ff5722" stroke="white" stroke-width="2"/></svg>`;
+      searchMarker = new tt.Marker({ element: el })
+        .setLngLat([position.lon, position.lat])
+        .addTo(map);
+      const popup = new tt.Popup({ offset: 35 }).setHTML(`
+        <div class="info-window">
+          <h3>${name}</h3>
+          <p>${(address && address.freeformAddress) || ''}</p>
+          <button class="route-btn" onclick="showRoute(${position.lat}, ${position.lon}, '${name.replace(/'/g, "\\'")}')">Route Here</button>
+        </div>
+      `);
+      searchMarker.setPopup(popup).togglePopup();
+      map.flyTo({ center: [position.lon, position.lat], zoom: 14 });
+      // hide list
+      const resultsEl = document.getElementById('searchResults');
+      resultsEl.style.display = 'none';
+    }
+    
+    // Add marker for a place
+    function addMarker(result, category) {
+      const { position, poi, address } = result;
+      if (!position) return;
+      const el = document.createElement('div');
+      el.innerHTML = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" fill="${category.color}" stroke="white" stroke-width="2"/></svg>`;
+      const marker = new tt.Marker({ element: el })
+        .setLngLat([position.lon, position.lat])
+        .addTo(map);
+
+      const name = (poi && poi.name) || 'Unknown';
+      const addr = (address && address.freeformAddress) || 'Address not available';
+      const infoContent = `
+        <div class="info-window">
+          <h3>${name}</h3>
+          <p><strong>Type:</strong> ${category.name}</p>
+          <p><strong>Address:</strong> ${addr}</p>
+          <button class="route-btn" onclick="showRoute(${position.lat}, ${position.lon}, '${name.replace(/'/g, "\\'")}')">Show Route</button>
+        </div>
+      `;
+      const popup = new tt.Popup({ offset: 35 }).setHTML(infoContent);
+      marker.setPopup(popup);
+
+      markers.push({ marker, popup });
+    }
+    
+    // Close all open info windows
+    function closeAllInfoWindows() {
+      markers.forEach(item => {
+        if (item.popup) item.popup.remove();
+      });
+    }
+    
+    // Clear all markers from the map
+    function clearMarkers() {
+      markers.forEach(item => {
+        if (item.marker) item.marker.remove();
+      });
+      markers = [];
+    }
+    
+    // Show route to a destination
+    function showRoute(destLat, destLng, placeName) {
+      if (!map) return;
+      // Remove existing route
+      if (map.getLayer(routeLayerId)) {
+        map.removeLayer(routeLayerId);
+      }
+      if (map.getSource(routeSourceId)) {
+        map.removeSource(routeSourceId);
+      }
+
+      const origin = `${userLocation.lng},${userLocation.lat}`;
+      const destination = `${destLng},${destLat}`;
+      tt.services.calculateRoute({
+        key: TOMTOM_API_KEY,
+        locations: `${origin}:${destination}`
+      })
+      .then(routeData => {
+        const geojson = routeData.toGeoJson();
+        map.addSource(routeSourceId, { type: 'geojson', data: geojson });
+        map.addLayer({
+          id: routeLayerId,
+          type: 'line',
+          source: routeSourceId,
+          paint: {
+            'line-color': '#0078d7',
+            'line-width': 5,
+            'line-opacity': 0.8
+          }
+        });
+
+        // Get summary for distance/duration
+        const route = routeData.routes && routeData.routes[0];
+        if (route && route.summary) {
+          const km = (route.summary.lengthInMeters / 1000).toFixed(1);
+          const mins = Math.round(route.summary.travelTimeInSeconds / 60);
+          document.getElementById("routeDistance").textContent = `Distance: ${km} km`;
+          document.getElementById("routeDuration").textContent = `Duration: ${mins} mins`;
+          document.getElementById("routeInfo").style.display = "block";
+        }
+
+        // Fit to route
+        const bounds = new tt.LngLatBounds();
+        geojson.features.forEach(f => {
+          f.geometry.coordinates.forEach(c => bounds.extend(c));
+        });
+        map.fitBounds(bounds, { padding: 80 });
+      })
+      .catch(() => alert('Could not calculate route.'));
+    }
+    
+    // Reset view to user's location
+    function resetView() {
+      if (userLocation) {
+        map.flyTo({
+          center: [userLocation.lng, userLocation.lat],
+          zoom: 13
+        });
+      }
+    }
+    
+    // Update selected categories based on checkbox states
+    function updateSelectedCategories() {
+      selectedCategories.hospital = document.getElementById("hospital").checked;
+      selectedCategories.vet = document.getElementById("vet").checked;
+      selectedCategories.ngo = document.getElementById("ngo").checked;
+      selectedCategories.trust = document.getElementById("trust").checked;
+    }
+    
+    // Initialize the application
+    function initApp() {
+      getUserLocation();
+      
+      // Add event listeners
+      document.getElementById("backTopBtn").addEventListener("click", () => {
+        try {
+          // If opened in a new tab/window, attempt to close; fallback to navigate
+          window.close();
+        } catch (e) {}
+        // Always navigate back to main app as a fallback
+        window.location.href = "index.html";
+      });
+      document.getElementById("closePanelBtn").addEventListener("click", () => {
+        document.getElementById("panel").style.display = "none";
+      });
+      document.getElementById("togglePanelBtn").addEventListener("click", () => {
+        const p = document.getElementById("panel");
+        p.style.display = (p.style.display === "none" ? "block" : "none");
+      });
+      document.getElementById("findBtn").addEventListener("click", findNearby);
+      document.getElementById("searchBtn").addEventListener("click", searchLocation);
+      document.getElementById("searchInput").addEventListener("keydown", (e) => { if (e.key === 'Enter') searchLocation(); });
+      document.getElementById("globalViewBtn").addEventListener("click", () => {
+        const bounds = new tt.LngLatBounds([-170, -60], [170, 75]);
+        map.fitBounds(bounds, { padding: 40 });
+      });
+      document.getElementById("resetViewBtn").addEventListener("click", resetView);
+      
+      document.querySelector(".clear-route").addEventListener("click", () => {
+        if (map.getLayer(routeLayerId)) map.removeLayer(routeLayerId);
+        if (map.getSource(routeSourceId)) map.removeSource(routeSourceId);
+        document.getElementById("routeInfo").style.display = "none";
+      });
+      
+      // Add change listeners to category checkboxes
+      const checkboxes = document.querySelectorAll('.category-checkbox input');
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCategories);
+      });
+    }
+    
+    // Start the application when the page loads
+    window.onload = initApp;
+  </script>
+</body>
+</html>

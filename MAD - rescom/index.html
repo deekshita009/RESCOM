@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESCOM - Incident Reporting System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-light: #6b8cbc;
+            --primary-dark: #3a5682;
+            --secondary: #7bb3b1;
+            --accent: #f9a826;
+            --light: #f8f9fa;
+            --light-gray: #e9ecef;
+            --medium-gray: #adb5bd;
+            --dark: #343a40;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
+        }
+
+        .login-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+        }
+
+        .logo .logo-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: var(--medium-gray);
+            font-size: 1rem;
+        }
+
+        .user-type-selector {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-type-btn {
+            flex: 1;
+            padding: 15px;
+            background: var(--light-gray);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-type-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .user-type-btn:hover:not(.active) {
+            background: var(--medium-gray);
+            color: white;
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background: #e89a1e;
+        }
+
+        .btn-disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-disabled:hover {
+            transform: none;
+            box-shadow: none;
+            background: var(--medium-gray);
+        }
+
+        .link-text {
+            margin-top: 20px;
+            color: var(--medium-gray);
+        }
+
+        .link-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+        }
+
+        .header {
+            background: white;
+            box-shadow: var(--shadow);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .profile-section {
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: var(--radius);
+            transition: background 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            background: var(--light-gray);
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .profile-modal {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            box-shadow: var(--shadow);
+            border-radius: var(--radius);
+            padding: 20px;
+            width: 280px;
+            margin-top: 10px;
+            z-index: 10;
+        }
+
+        .profile-modal.active {
+            display: block;
+        }
+
+        .profile-info {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .profile-info h3 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .profile-info p {
+            color: var(--medium-gray);
+            font-size: 0.9rem;
+        }
+
+        .demerit-points, .credit-points {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .points-value {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .credit-value {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .logout-btn {
+            width: 100%;
+            margin-top: 15px;
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+
+        .logout-btn:hover {
+            background: var(--medium-gray);
+            color: white;
+        }
+
+        .dashboard-content {
+            padding: 40px 0;
+        }
+
+        .section-title {
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .action-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .action-card.disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .action-card.disabled .action-icon {
+            color: var(--medium-gray);
+        }
+
+        .action-card h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .action-card.disabled h3 {
+            color: var(--medium-gray);
+        }
+
+        .action-card p {
+            color: var(--medium-gray);
+        }
+
+        .requirement-notice {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--warning);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .reports-section {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+
+        .reports-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .reports-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .reports-table th,
+        .reports-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .reports-table th {
+            background: var(--light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-accepted {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        /* Form Page Styles */
+        .form-page {
+            display: none;
+            padding: 40px 0;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Media preview for camera */
+        .media-preview { display: none; margin: 10px 0; }
+        .media-actions { display: flex; gap: 10px; margin-top: 8px; }
+        video#cameraStream { width: 100%; max-height: 260px; border-radius: 8px; background: #000; }
+        canvas#cameraSnapshot { display: none; width: 100%; max-height: 260px; border-radius: 8px; }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        .form-title {
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* Volunteer Dashboard Styles */
+        .volunteer-dashboard {
+            display: none;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-card .stat-icon { font-size: 1.6rem; }
+        .stat-card.pending { background: #ffe7b8; }
+        .stat-card.pending .stat-icon { color: #e39d29; }
+        .stat-card.accepted { background: #d9ebff; }
+        .stat-card.accepted .stat-icon { color: #3a6aa3; }
+        .stat-card.completed { background: #daf5e3; }
+        .stat-card.completed .stat-icon { color: #218838; }
+        .stat-card.response { background: #eed9ff; }
+        .stat-card.response .stat-icon { color: #5b35b1; }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--medium-gray);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 25px;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--medium-gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .message-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .organizations-list {
+            flex: 1;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .organization-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid var(--light-gray);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .organization-item:hover {
+            background: var(--light);
+        }
+
+        .organization-item:last-child {
+            border-bottom: none;
+        }
+
+        .org-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .chat-container {
+            flex: 2;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* New chat row styles using sent-message/received-message */
+        .chat-row { display: flex; width: 100%; margin: 8px 0; }
+        .chat-row.sent-message { justify-content: flex-end; }
+        .chat-row.received-message { justify-content: flex-start; }
+        .chat-row .bubble {
+            display: inline-flex;
+            flex-direction: column;
+            width: -moz-fit-content;
+            width: fit-content;
+            max-width: 50%;
+            padding: 6px 10px;
+            border-radius: 14px;
+            position: relative;
+            line-height: 1.3;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .sent-message .bubble { background: var(--primary); color: #fff; border-top-left-radius: 16px; border-top-right-radius: 6px; }
+        .received-message .bubble { background: #dcf8c6; color: #0b4121; border-top-left-radius: 6px; border-top-right-radius: 16px; }
+        .bubble .time { font-size: 0.72rem; opacity: 0.8; margin-top: 4px; text-align: right; }
+
+        /* Responsive bubble width for small screens */
+        @media (max-width: 600px) {
+            .chat-row .bubble { max-width: 75%; }
+        }
+
+        .message {
+            margin-bottom: 12px;
+            width: 100%;
+            display: flex;
+        }
+
+        .message.received {
+            justify-content: flex-start;
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.92rem;
+            position: relative;
+            line-height: 1.3;
+            max-width: 75%;
+        }
+
+        .message.received .message-content {
+            background: #dcf8c6; /* WhatsApp-like green */
+            color: #0b4121;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 18px;
+        }
+        .message.received .message-content::after {
+            content: "";
+            position: absolute;
+            left: -6px;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 8px 0 0;
+            border-color: #dcf8c6 transparent transparent transparent;
+        }
+
+        .message.sent .message-content {
+            background: var(--primary); /* Blue */
+            color: #ffffff;
+            border-top-right-radius: 6px;
+            border-top-left-radius: 18px;
+        }
+        .message.sent .message-content::after {
+            content: "";
+            position: absolute;
+            right: -6px;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 0 0 8px;
+            border-color: transparent transparent transparent var(--primary);
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--medium-gray);
+            margin-top: 5px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Donation Form Styles */
+        .file-upload {
+            border: 2px dashed var(--light-gray);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: border 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+        }
+
+        .file-upload i {
+            font-size: 2rem;
+            color: var(--medium-gray);
+            margin-bottom: 10px;
+        }
+
+        .file-upload p {
+            color: var(--medium-gray);
+            margin-bottom: 10px;
+        }
+
+        .file-upload label {
+            display: inline-block;
+            padding: 8px 15px;
+            background: var(--light-gray);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .file-upload label:hover {
+            background: var(--medium-gray);
+            color: white;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .uploaded-files {
+            margin-top: 10px;
+        }
+
+        .uploaded-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: var(--light);
+            border-radius: var(--radius);
+            margin-bottom: 5px;
+        }
+
+        .uploaded-file i {
+            color: var(--success);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .action-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .message-section {
+                flex-direction: column;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <div class="login-card">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-hands-helping"></i></div>
+                <h1>RESCOM</h1>
+                <p>Incident Reporting & Management System</p>
+            </div>
+            
+            <div class="user-type-selector">
+                <button class="user-type-btn active" id="reporterBtn">Reporter</button>
+                <button class="user-type-btn" id="volunteerBtn">Volunteer</button>
+            </div>
+            
+            <!-- Reporter Login Form -->
+            <form class="login-form active" id="reporterForm">
+                <div class="form-group">
+                    <label for="reporterEmail">Email Address</label>
+                    <input type="email" class="form-control" id="reporterEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="reporterUsername">Username</label>
+                    <input type="text" class="form-control" id="reporterUsername" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="reporterMobile">Mobile Number</label>
+                    <input type="tel" class="form-control" id="reporterMobile" placeholder="Enter your mobile number" required>
+                </div>
+                <button type="button" class="btn btn-block" id="reporterLoginBtn">Login / Sign Up</button>
+                <p class="link-text">By continuing, you agree to our <a href="#">Terms of Service</a></p>
+            </form>
+            
+            <!-- Volunteer Login Form -->
+            <form class="login-form" id="volunteerForm">
+                <div class="form-group">
+                    <label for="volunteerLoginUsername">Username</label>
+                    <input type="text" class="form-control" id="volunteerLoginUsername" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="volunteerLoginPassword">Password</label>
+                    <input type="password" class="form-control" id="volunteerLoginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="button" class="btn btn-block" id="volunteerLoginBtn">Sign In</button>
+                <p class="link-text">Contact admin if you forgot your credentials</p>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Reporter Dashboard -->
+    <div class="dashboard" id="reporterDashboard">
+        <header class="header">
+            <div class="container header-content">
+                <div class="logo">
+                    <h1>RESCOM</h1>
+                </div>
+                <nav class="nav-links">
+                    
+                </nav>
+                <div class="profile-section">
+                    <button class="profile-btn" id="profileBtn">
+                        <div class="profile-img" id="profileInitial">U</div>
+                        <span id="profileUsername">Username</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="profile-modal" id="profileModal">
+                        <div class="profile-info">
+                            <h3 id="modalUsername">Username</h3>
+                            <p id="modalEmail">user@example.com</p>
+                            <div class="credit-points">
+                                <span>Credit Points:</span>
+                                <span class="credit-value" id="creditPoints">0</span>
+                            </div>
+                        </div>
+                        <button class="btn logout-btn" id="reporterLogoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="dashboard-content container">
+            <h2 class="section-title">Report an Incident</h2>
+            <div class="action-cards">
+                <div class="action-card" id="humanIncidentBtn">
+                    <div class="action-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Human Incident</h3>
+                    <p>Report issues related to humans in distress</p>
+                </div>
+                <div class="action-card" id="animalIncidentBtn">
+                    <div class="action-icon">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                    <h3>Animal Incident</h3>
+                    <p>Report issues related to animals in distress</p>
+                </div>
+                <div class="action-card" id="adoptBtn">
+                    <div class="action-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <h3>Adopt</h3>
+                    <p>Find animals available for adoption</p>
+                    <div class="requirement-notice">200+ Credits</div>
+                </div>
+                <div class="action-card" id="donateBtn">
+                    <div class="action-icon">
+                        <i class="fas fa-donate"></i>
+                    </div>
+                    <h3>Donate</h3>
+                    <p>Support our cause with donations</p>
+                </div>
+            </div>
+            
+            <div class="reports-section">
+                <div class="reports-header">
+                    <h2 class="section-title">My Reports</h2>
+                    <button class="btn btn-accent">View All</button>
+                </div>
+                <table class="reports-table">
+                    <thead>
+                        <tr>
+                            <th>S. No</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <!-- Reports will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Incident Form Page -->
+    <div class="form-page" id="incidentFormPage">
+        <div class="container">
+            <a href="#" class="back-btn" id="backToDashboard">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <div class="form-container">
+                <h2 class="form-title" id="formTitle">Report Incident</h2>
+                <form id="incidentForm">
+                    <div class="form-group">
+                        <label for="incidentCategory">Category</label>
+                        <select class="form-control" id="incidentCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="abandoned">Abandoned</option>
+                            <option value="injured">Injured</option>
+                            <option value="mentally-ill">Mentally Ill</option>
+                            <option value="others">Others</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="incidentLocation">Location</label>
+                            <div class="media-actions">
+                                <button type="button" class="btn" id="useLocationBtn">Use My Location</button>
+                                <small style="align-self:center;color:var(--medium-gray)">or type manually</small>
+                            </div>
+                            <input type="text" class="form-control" id="incidentLocation" placeholder="Enter incident location" required>
+                            <input type="hidden" id="incidentLat">
+                            <input type="hidden" id="incidentLng">
+                        </div>
+                        <div class="form-group">
+                            <label for="incidentDate">Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="incidentDate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="incidentDescription">Description</label>
+                        <textarea class="form-control" id="incidentDescription" placeholder="Provide detailed description of the incident" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="incidentImage">Upload Image (Optional)</label>
+                        <div class="media-actions">
+                            <button type="button" class="btn" id="openCameraBtn">Open Camera</button>
+                            <button type="button" class="btn btn-accent" id="capturePhotoBtn" disabled>Capture</button>
+                            <button type="button" class="btn btn-disabled" id="closeCameraBtn" disabled>Close</button>
+                        </div>
+                        <div class="media-preview" id="cameraPreview">
+                            <video id="cameraStream" autoplay playsinline></video>
+                            <canvas id="cameraSnapshot"></canvas>
+                        </div>
+                        <input type="file" class="form-control" id="incidentImage" accept="image/*" capture="environment">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Submit Report</button>
+                    
+                    <div class="success-message" id="successMessage">
+                        <i class="fas fa-check-circle"></i> Incident reported successfully!
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Donation Form Page -->
+    <div class="form-page" id="donationFormPage">
+        <div class="container">
+            <a href="#" class="back-btn" id="backFromDonation">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <div class="form-container">
+                <h2 class="form-title">Donation Form</h2>
+                <form id="donationForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="donorName">Full Name</label>
+                            <input type="text" class="form-control" id="donorName" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="donorMobile">Mobile Number</label>
+                            <input type="tel" class="form-control" id="donorMobile" placeholder="Enter your mobile number" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="donorEmail">Email Address</label>
+                            <input type="email" class="form-control" id="donorEmail" placeholder="Enter your email address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="donorBloodGroup">Blood Group</label>
+                            <select class="form-control" id="donorBloodGroup" required>
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="donorAddress">Address</label>
+                        <textarea class="form-control" id="donorAddress" placeholder="Enter your complete address" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Aadhar Proof</label>
+                        <div class="file-upload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Upload Aadhar Card (Front & Back)</p>
+                            <label for="aadharProof">Choose Files</label>
+                            <input type="file" id="aadharProof" accept="image/*,.pdf" multiple>
+                            <div class="uploaded-files" id="aadharFiles"></div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Submit Donation Form</button>
+                    
+                    <div class="success-message" id="donationSuccessMessage">
+                        <i class="fas fa-check-circle"></i> Donation form submitted successfully!
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Volunteer Dashboard -->
+    <div class="dashboard volunteer-dashboard" id="volunteerDashboard">
+        <header class="header">
+            <div class="container header-content">
+                <div class="logo">
+                    <h1>RESCOM Volunteer</h1>
+                </div>
+                <!<nav class="nav-links">
+                    <a href="#" class="active"></a>
+                    <a href="#"></a>
+                    <a href="#"></a>
+                    <a href="#"></a>
+                    <a href="#" id="volunteerDonateBtn"></a>
+                </nav>
+                <div class="profile-section">
+                    <button class="profile-btn" id="volunteerProfileBtn">
+                        <div class="profile-img" id="volunteerProfileInitial">V</div>
+                        <span id="volunteerUsernameText">Volunteer</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="profile-modal" id="volunteerProfileModal">
+                        <div class="profile-info">
+                            <h3 id="volunteerModalUsername">Volunteer Name</h3>
+                            <p id="volunteerModalOrg">Organization Name</p>
+                        </div>
+                        <button class="btn logout-btn" id="volunteerLogoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="dashboard-content container">
+            <h2 class="section-title">Volunteer Dashboard</h2>
+            
+            <div class="stats-cards">
+                <div class="stat-card pending">
+                    <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="stat-value" id="pendingReports">12</div>
+                    <div class="stat-label">Pending Reports</div>
+                </div>
+                <div class="stat-card accepted">
+                    <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="stat-value" id="acceptedReports">5</div>
+                    <div class="stat-label">Accepted / Processing</div>
+                </div>
+                <div class="stat-card completed">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-value" id="completedReports">23</div>
+                    <div class="stat-label">Completed / Rescued</div>
+                    <div class="stat-label" style="margin-top:6px;color:var(--medium-gray);font-size:0.9rem">Rescued: <span id="rescuedReports">0</span></div>
+                </div>
+                <div class="stat-card response">
+                    <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="stat-value" id="responseRate">94%</div>
+                    <div class="stat-label">Response Rate</div>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" data-tab="reports">Reports</button>
+                <button class="tab" data-tab="organizations">Organizations</button>
+                <button class="tab" data-tab="messages">Messages</button>
+                <button class="tab" data-tab="donations">Donations</button>
+            </div>
+            
+            <div class="tab-content active" id="reportsTab">
+                <div class="reports-section">
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>S. No</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th>Reporter</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="volunteerReportsTableBody">
+                            <!-- Volunteer reports will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="organizationsTab">
+                <div class="reports-section">
+                    <h3 class="section-title">Partner Organizations</h3>
+                    <div class="organizations-list">
+                        <!-- Organizations will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="messagesTab">
+                <div class="message-section">
+                    <div class="organizations-list" id="messageOrganizationsList">
+                        <!-- Organizations for messaging will be populated here -->
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-header" id="chatHeader">Select an organization to start chatting</div>
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Messages will be populated here -->
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+                            <button id="sendMessageBtn" disabled><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="donationsTab">
+                <div class="reports-section">
+                    <h3 class="section-title">Donation Applications</h3>
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>S. No</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Blood Group</th>
+                                <th>Submitted On</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donationsTableBody">
+                            <!-- Donation applications will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert2 for nicer prompts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // DOM Elements
+        const loginPage = document.getElementById('loginPage');
+        const reporterDashboard = document.getElementById('reporterDashboard');
+        const volunteerDashboard = document.getElementById('volunteerDashboard');
+        const incidentFormPage = document.getElementById('incidentFormPage');
+        const donationFormPage = document.getElementById('donationFormPage');
+        
+        // Login Page Elements
+        const reporterBtn = document.getElementById('reporterBtn');
+        const volunteerBtn = document.getElementById('volunteerBtn');
+        const reporterForm = document.getElementById('reporterForm');
+        const volunteerForm = document.getElementById('volunteerForm');
+        const reporterLoginBtn = document.getElementById('reporterLoginBtn');
+        const volunteerLoginBtn = document.getElementById('volunteerLoginBtn');
+        
+        // Reporter Dashboard Elements
+        const profileBtn = document.getElementById('profileBtn');
+        const profileModal = document.getElementById('profileModal');
+        const humanIncidentBtn = document.getElementById('humanIncidentBtn');
+        const animalIncidentBtn = document.getElementById('animalIncidentBtn');
+        const adoptBtn = document.getElementById('adoptBtn');
+        const donateBtn = document.getElementById('donateBtn');
+        const backToDashboard = document.getElementById('backToDashboard');
+        const backFromDonation = document.getElementById('backFromDonation');
+        const incidentForm = document.getElementById('incidentForm');
+        const donationForm = document.getElementById('donationForm');
+        const successMessage = document.getElementById('successMessage');
+        const donationSuccessMessage = document.getElementById('donationSuccessMessage');
+        const formTitle = document.getElementById('formTitle');
+        const reportsTableBody = document.getElementById('reportsTableBody');
+        const reporterLogoutBtn = document.getElementById('reporterLogoutBtn');
+        const creditPointsElement = document.getElementById('creditPoints');
+        
+        // Volunteer Dashboard Elements
+        const volunteerProfileBtn = document.getElementById('volunteerProfileBtn');
+        const volunteerProfileModal = document.getElementById('volunteerProfileModal');
+        const volunteerLogoutBtn = document.getElementById('volunteerLogoutBtn');
+        const volunteerDonateBtn = document.getElementById('volunteerDonateBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const volunteerReportsTableBody = document.getElementById('volunteerReportsTableBody');
+        const donationsTableBody = document.getElementById('donationsTableBody');
+        
+        // File Upload Elements
+        const aadharProof = document.getElementById('aadharProof');
+        const medicalCertificate = document.getElementById('medicalCertificate');
+        const aadharFiles = document.getElementById('aadharFiles');
+        const medicalFiles = document.getElementById('medicalFiles');
+        
+        // State / API
+        const apiBase = './api';
+        let authToken = localStorage.getItem('rescom_token');
+        let currentUser = null;
+        let currentIncidentType = '';
+        let creditPoints = 0;
+        let currentChatOrgId = null;
+        let messagePollInterval = null;
+        let statsInterval = null;
+        // Camera state
+        let cameraStream = null;
+        let cameraImageBlob = null;
+
+        function apiFetch(path, options = {}) {
+            const headers = options.headers || {};
+            if (!(options.body instanceof FormData)) {
+                headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+            }
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+            return fetch(`${apiBase}/${path}`, { ...options, headers });
+        }
+        function handleAuthResponse(res) {
+            if (!res.ok) return res.json().then(d => { throw d; });
+            return res.json();
+        }
+        
+        // Initialize the application
+        function init() {
+            // Set current date and time for incident form
+            const now = new Date();
+            const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('incidentDate').value = localDateTime;
+            
+            // Update credit points display
+            updateCreditPointsDisplay();
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+        
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Login page
+            reporterBtn.addEventListener('click', () => switchLoginForm('reporter'));
+            volunteerBtn.addEventListener('click', () => switchLoginForm('volunteer'));
+            reporterLoginBtn.addEventListener('click', loginReporter);
+            volunteerLoginBtn.addEventListener('click', loginVolunteer);
+            
+            // Reporter dashboard
+            profileBtn.addEventListener('click', toggleProfileModal);
+            humanIncidentBtn.addEventListener('click', () => openIncidentForm('Human'));
+            animalIncidentBtn.addEventListener('click', () => openIncidentForm('Animal'));
+            adoptBtn.addEventListener('click', handleAdoptClick);
+            donateBtn.addEventListener('click', () => openDonationForm());
+            backToDashboard.addEventListener('click', goBackToDashboard);
+            backFromDonation.addEventListener('click', goBackToDashboard);
+            incidentForm.addEventListener('submit', submitIncidentForm);
+            donationForm.addEventListener('submit', submitDonationForm);
+            reporterLogoutBtn.addEventListener('click', logout);
+
+            // Incident helpers
+            document.getElementById('useLocationBtn').addEventListener('click', useLiveLocation);
+            document.getElementById('openCameraBtn').addEventListener('click', openCamera);
+            document.getElementById('capturePhotoBtn').addEventListener('click', capturePhoto);
+            document.getElementById('closeCameraBtn').addEventListener('click', closeCamera);
+            
+            // Volunteer dashboard
+            volunteerProfileBtn.addEventListener('click', toggleVolunteerProfileModal);
+            volunteerLogoutBtn.addEventListener('click', logout);
+            volunteerDonateBtn.addEventListener('click', () => switchTab('donations'));
+            
+            // Tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+            
+            // File uploads
+            aadharProof.addEventListener('change', handleFileUpload);
+            medicalCertificate.addEventListener('change', handleFileUpload);
+            
+            // Close modals when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.profile-section')) {
+                    profileModal.classList.remove('active');
+                    volunteerProfileModal.classList.remove('active');
+                }
+            });
+        }
+        
+        // Switch between reporter and volunteer login forms
+        function switchLoginForm(type) {
+            if (type === 'reporter') {
+                reporterBtn.classList.add('active');
+                volunteerBtn.classList.remove('active');
+                reporterForm.classList.add('active');
+                volunteerForm.classList.remove('active');
+            } else {
+                volunteerBtn.classList.add('active');
+                reporterBtn.classList.remove('active');
+                volunteerForm.classList.add('active');
+                reporterForm.classList.remove('active');
+            }
+        }
+        
+        // Login as reporter
+        function loginReporter() {
+            const email = document.getElementById('reporterEmail').value;
+            const username = document.getElementById('reporterUsername').value;
+            const mobile = document.getElementById('reporterMobile').value;
+            
+            if (!email || !username || !mobile) {
+                alert('Please fill in all fields');
+                return;
+            }
+            apiFetch('auth.php', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'reporter_login', email, username, mobile })
+            })
+            .then(handleAuthResponse)
+            .then(data => {
+                authToken = data.token;
+                localStorage.setItem('rescom_token', authToken);
+                currentUser = { type: 'reporter', ...data.user };
+                creditPoints = data.user.credit_points || 0;
+                // Update UI
+                document.getElementById('profileInitial').textContent = data.user.initial;
+                document.getElementById('profileUsername').textContent = data.user.username;
+                document.getElementById('modalUsername').textContent = data.user.username;
+                document.getElementById('modalEmail').textContent = data.user.email;
+                updateCreditPointsDisplay();
+                loginPage.style.display = 'none';
+                reporterDashboard.style.display = 'block';
+                loadUserReports();
+            })
+            .catch(err => alert(err.error || 'Login failed'));
+        }
+        
+        // Login as volunteer
+        function loginVolunteer() {
+            const username = document.getElementById('volunteerLoginUsername').value;
+            const password = document.getElementById('volunteerLoginPassword').value;
+            
+            if (!username || !password) {
+                alert('Please enter both username and password');
+                return;
+            }
+            apiFetch('auth.php', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'volunteer_login', username, password })
+            })
+            .then(handleAuthResponse)
+            .then(data => {
+                authToken = data.token;
+                localStorage.setItem('rescom_token', authToken);
+                currentUser = { type: 'volunteer', ...data.user };
+                // Update UI with volunteer info
+                document.getElementById('volunteerProfileInitial').textContent = data.user.initial;
+                document.getElementById('volunteerUsernameText').textContent = data.user.username;
+                document.getElementById('volunteerModalUsername').textContent = data.user.username;
+                document.getElementById('volunteerModalOrg').textContent = data.user.organization;
+                loginPage.style.display = 'none';
+                volunteerDashboard.style.display = 'block';
+                // Load dynamic data for volunteer
+                loadVolunteerStats();
+                loadVolunteerReports();
+                loadOrganizations();
+                loadDonationsTable();
+                // Start periodic stats refresh
+                if (statsInterval) clearInterval(statsInterval);
+                statsInterval = setInterval(loadVolunteerStats, 15000);
+            })
+            
+        }
+        
+        // Logout function
+        function logout() {
+            currentUser = null;
+            authToken = null;
+            localStorage.removeItem('rescom_token');
+            if (messagePollInterval) { clearInterval(messagePollInterval); messagePollInterval = null; }
+            if (statsInterval) { clearInterval(statsInterval); statsInterval = null; }
+            reporterDashboard.style.display = 'none';
+            volunteerDashboard.style.display = 'none';
+            incidentFormPage.style.display = 'none';
+            donationFormPage.style.display = 'none';
+            loginPage.style.display = 'flex';
+            
+            // Reset forms
+            document.getElementById('reporterForm').reset();
+            document.getElementById('volunteerForm').reset();
+            document.getElementById('incidentForm').reset();
+            document.getElementById('donationForm').reset();
+            
+            // Hide success messages
+            successMessage.style.display = 'none';
+            donationSuccessMessage.style.display = 'none';
+            
+            // Reset file upload displays
+            aadharFiles.innerHTML = '';
+            medicalFiles.innerHTML = '';
+        }
+        
+        // Toggle profile modal
+        function toggleProfileModal() {
+            profileModal.classList.toggle('active');
+        }
+        
+        // Toggle volunteer profile modal
+        function toggleVolunteerProfileModal() {
+            volunteerProfileModal.classList.toggle('active');
+        }
+        
+        // Open incident form
+        function openIncidentForm(type) {
+            currentIncidentType = type;
+            formTitle.textContent = `Report ${type} Incident`;
+            reporterDashboard.style.display = 'none';
+            incidentFormPage.style.display = 'block';
+        }
+        
+        // Open donation form
+        function openDonationForm() {
+            if (currentUser.type === 'reporter') {
+                reporterDashboard.style.display = 'none';
+            } else {
+                volunteerDashboard.style.display = 'none';
+            }
+            donationFormPage.style.display = 'block';
+        }
+        
+        // Go back to dashboard from form
+        function goBackToDashboard() {
+            incidentFormPage.style.display = 'none';
+            donationFormPage.style.display = 'none';
+            if (currentUser.type === 'reporter') {
+                reporterDashboard.style.display = 'block';
+            } else {
+                volunteerDashboard.style.display = 'block';
+            }
+        }
+        
+        // Handle adopt button click
+        function handleAdoptClick() {
+            if (creditPoints >= 200) {
+                alert('Adoption portal would open here. You have sufficient credit points!');
+                // In a real application, this would redirect to the adoption portal
+            } else {
+                alert(`You need at least 200 credit points to access the adoption portal. You currently have ${creditPoints} points.`);
+            }
+        }
+        
+        // Update credit points display and adopt button state
+        function updateCreditPointsDisplay() {
+            creditPointsElement.textContent = creditPoints;
+            
+            // Enable/disable adopt button based on credit points
+            if (creditPoints >= 200) {
+                adoptBtn.classList.remove('disabled');
+            } else {
+                adoptBtn.classList.add('disabled');
+            }
+        }
+        
+        // Submit incident form
+        function submitIncidentForm(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('incidentCategory').value;
+            const location = document.getElementById('incidentLocation').value;
+            const date = document.getElementById('incidentDate').value;
+            const description = document.getElementById('incidentDescription').value;
+            const image = document.getElementById('incidentImage').files[0];
+            const lat = document.getElementById('incidentLat').value;
+            const lng = document.getElementById('incidentLng').value;
+
+            const formData = new FormData();
+            formData.append('type', currentIncidentType.toLowerCase());
+            formData.append('category', category.replace('-', '_'));
+            formData.append('location', location);
+            if (lat && lng) { formData.append('latitude', lat); formData.append('longitude', lng); }
+            formData.append('incident_datetime', date.replace('T', ' ') + ':00');
+            formData.append('description', description);
+            if (image) {
+                formData.append('image', image);
+            } else if (cameraImageBlob) {
+                formData.append('image', cameraImageBlob, 'incident.jpg');
+            }
+
+            fetch(`${apiBase}/reports.php`, {
+                method: 'POST',
+                headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {},
+                body: formData
+            })
+            .then(handleAuthResponse)
+            .then(() => {
+                // Show success message and reset form
+                successMessage.style.display = 'block';
+                document.getElementById('incidentForm').reset();
+                const now = new Date();
+                const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                document.getElementById('incidentDate').value = localDateTime;
+                // reset camera and location
+                cameraImageBlob = null;
+                closeCamera();
+                document.getElementById('incidentLat').value = '';
+                document.getElementById('incidentLng').value = '';
+                loadUserReports();
+
+                // SweetAlert prompt to open map routes
+                Swal.fire({
+                    title: 'Would you like to take the rescue in hand?',
+                    text: 'If yes, we will show routes and nearby facilities on a map.',
+                    icon: 'question',
+                    showDenyButton: true,
+                    confirmButtonText: 'Yes, show routes',
+                    denyButtonText: 'No, go to dashboard'
+                }).then((result) => {
+                    successMessage.style.display = 'none';
+                    if (result.isConfirmed) {
+                        window.open('map.html', '_blank');
+                        goBackToDashboard();
+                    } else {
+                        goBackToDashboard();
+                    }
+                });
+            })
+            .catch(err => alert(err.error || 'Failed to submit report'));
+        }
+
+        // Use browser geolocation + reverse geocode with robust fallbacks
+        function useLiveLocation() {
+            if (!navigator.geolocation) return alert('Geolocation not supported');
+            const btn = document.getElementById('useLocationBtn');
+            btn.disabled = true; btn.textContent = 'Getting location...';
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                document.getElementById('incidentLat').value = latitude;
+                document.getElementById('incidentLng').value = longitude;
+
+                const fallbackCoords = () => {
+                    document.getElementById('incidentLocation').value = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+                };
+
+                // Timeout helper
+                const withTimeout = (p, ms = 6000) => {
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), ms);
+                    return p(ctrl.signal).finally(() => clearTimeout(t));
+                };
+
+                try {
+                    // 1) Try maps.co (a browser-friendly proxy for Nominatim)
+                    const q1 = () => fetch(`https://geocode.maps.co/reverse?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`);
+                    let res = await withTimeout(q1);
+                    if (!res.ok) throw new Error('maps.co failed');
+                    let data = await res.json();
+                    if (data && data.display_name) {
+                        document.getElementById('incidentLocation').value = data.display_name;
+                    } else {
+                        throw new Error('maps.co no display_name');
+                    }
+                } catch (_) {
+                    try {
+                        // 2) Fallback to direct Nominatim
+                        const q2 = () => fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`);
+                        const res2 = await withTimeout(q2);
+                        if (!res2.ok) throw new Error('nominatim failed');
+                        const data2 = await res2.json();
+                        if (data2 && data2.display_name) {
+                            document.getElementById('incidentLocation').value = data2.display_name;
+                        } else {
+                            fallbackCoords();
+                        }
+                    } catch (e) {
+                        fallbackCoords();
+                    }
+                } finally {
+                    btn.disabled = false; btn.textContent = 'Use My Location';
+                }
+            }, (err) => {
+                alert(err.message || 'Unable to get location');
+                btn.disabled = false; btn.textContent = 'Use My Location';
+            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        }
+
+        // Camera controls
+        async function openCamera() {
+            try {
+                const video = document.getElementById('cameraStream');
+                const preview = document.getElementById('cameraPreview');
+                const captureBtn = document.getElementById('capturePhotoBtn');
+                const closeBtn = document.getElementById('closeCameraBtn');
+                cameraImageBlob = null;
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = cameraStream;
+                preview.style.display = 'block';
+                video.style.display = 'block';
+                document.getElementById('cameraSnapshot').style.display = 'none';
+                captureBtn.disabled = false; closeBtn.disabled = false;
+            } catch (e) {
+                alert('Unable to access camera');
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraStream');
+            const canvas = document.getElementById('cameraSnapshot');
+            if (!video.srcObject) return;
+            const track = video.srcObject.getVideoTracks()[0];
+            const settings = track.getSettings();
+            const w = Math.min(800, settings.width || 800);
+            const h = Math.min(800, settings.height || 800);
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, w, h);
+            canvas.toBlob((blob) => { cameraImageBlob = blob; }, 'image/jpeg', 0.9);
+            // show snapshot instead of live
+            canvas.style.display = 'block';
+            video.style.display = 'none';
+        }
+
+        function closeCamera() {
+            const video = document.getElementById('cameraStream');
+            const preview = document.getElementById('cameraPreview');
+            const captureBtn = document.getElementById('capturePhotoBtn');
+            const closeBtn = document.getElementById('closeCameraBtn');
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null;
+            }
+            video.srcObject = null;
+            preview.style.display = 'none';
+            captureBtn.disabled = true; closeBtn.disabled = true;
+        }
+        
+        // Submit donation form
+        function submitDonationForm(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('donorName').value;
+            const mobile = document.getElementById('donorMobile').value;
+            const email = document.getElementById('donorEmail').value;
+            const bloodGroup = document.getElementById('donorBloodGroup').value;
+            const address = document.getElementById('donorAddress').value;
+            const aadharProofFiles = document.getElementById('aadharProof').files;
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('mobile', mobile);
+            formData.append('email', email);
+            formData.append('blood_group', bloodGroup);
+            formData.append('address', address);
+            for (let i = 0; i < aadharProofFiles.length; i++) formData.append('aadhar_files[]', aadharProofFiles[i]);
+
+            fetch(`${apiBase}/donations.php`, {
+                method: 'POST',
+                headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {},
+                body: formData
+            })
+            .then(handleAuthResponse)
+            .then(() => {
+                donationSuccessMessage.style.display = 'block';
+                document.getElementById('donationForm').reset();
+                aadharFiles.innerHTML = '';
+                if (currentUser.type === 'volunteer') loadDonationsTable();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thank you for your generosity!',
+                    text: 'We appreciate your willingness to help. Our team will reach out to you soon with next steps.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    donationSuccessMessage.style.display = 'none';
+                    goBackToDashboard();
+                });
+            })
+            .catch(err => alert(err.error || 'Failed to submit donation'));
+        }
+        
+        // Handle file upload
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            const containerId = 'aadharFiles';
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = '';
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileElement = document.createElement('div');
+                fileElement.className = 'uploaded-file';
+                fileElement.innerHTML = `
+                    <i class="fas fa-file"></i>
+                    <span>${file.name}</span>
+                `;
+                container.appendChild(fileElement);
+            }
+        }
+        
+        // Load user's reports into the table (from API)
+        function loadUserReports() {
+            reportsTableBody.innerHTML = '';
+            apiFetch('reports.php')
+                .then(handleAuthResponse)
+                .then(data => {
+                    (data.reports || []).forEach((report, idx) => {
+                        const row = document.createElement('tr');
+                        const statusMap = { pending: 'status-pending', accepted: 'status-accepted', processing: 'status-accepted', completed: 'status-completed' };
+                        const statusClass = statusMap[report.status] || '';
+                        row.innerHTML = `
+                            <td>${idx + 1}</td>
+                            <td>${report.type.charAt(0).toUpperCase() + report.type.slice(1)}</td>
+                            <td>${report.category.replace('_',' ')}</td>
+                            <td>${report.date}</td>
+                            <td><span class="status-badge ${statusClass}">${report.status.charAt(0).toUpperCase() + report.status.slice(1)}</span></td>
+                        `;
+                        reportsTableBody.appendChild(row);
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+        
+        // Load reports for volunteer (from API)
+        function loadVolunteerReports() {
+            volunteerReportsTableBody.innerHTML = '';
+            apiFetch('reports.php')
+                .then(handleAuthResponse)
+                .then(data => {
+                    (data.reports || []).forEach((report, idx) => {
+                        const row = document.createElement('tr');
+                        const statusMap = {
+                            pending: 'status-pending',
+                            accepted: 'status-accepted',
+                            processing: 'status-accepted',
+                            completed: 'status-completed',
+                            rejected: 'status-pending',
+                            forwarded: 'status-accepted',
+                            reached: 'status-accepted',
+                            rescued: 'status-completed'
+                        };
+                        const statusClass = statusMap[report.status] || '';
+                        row.innerHTML = `
+                            <td>${idx + 1}</td>
+                            <td>${report.type.charAt(0).toUpperCase() + report.type.slice(1)}</td>
+                            <td>${report.category.replace('_',' ')}</td>
+                            <td>${report.location}</td>
+                            <td>${report.reporter_email}</td>
+                            <td>${report.date}</td>
+                            <td><span class="status-badge ${statusClass}">${report.status.charAt(0).toUpperCase() + report.status.slice(1)}</span></td>
+                            <td>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                                    <button class="btn" style="padding:5px 8px;font-size:0.78rem" onclick="updateVolunteerReportStatus(${report.id}, 'accepted')">Accept</button>
+                                    <button class="btn" style="padding:5px 8px;font-size:0.78rem;background:#6c757d" onclick="updateVolunteerReportStatus(${report.id}, 'processing')">Processing</button>
+                                    <button class="btn" style="padding:5px 8px;font-size:0.78rem;background:#17a2b8" onclick="updateVolunteerReportStatus(${report.id}, 'reached')">Reached</button>
+                                    <button class="btn" style="padding:5px 8px;font-size:0.78rem;background:#28a745" onclick="updateVolunteerReportStatus(${report.id}, 'rescued')">Rescued</button>
+                                    <button class="btn" style="padding:5px 8px;font-size:0.78rem;background:#dc3545" onclick="updateVolunteerReportStatus(${report.id}, 'rejected')">Reject</button>
+                                    <button class="btn" style="padding:5px 8px;font-size:0.78rem;background:#ff7f0e" onclick="forwardReport(${report.id})">Forward</button>
+                                </div>
+                            </td>
+                        `;
+                        volunteerReportsTableBody.appendChild(row);
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+
+        // Update report status via API (Volunteer only)
+        function updateVolunteerReportStatus(reportId, status) {
+            apiFetch('reports.php', {
+                method: 'PUT',
+                body: JSON.stringify({ report_id: reportId, status })
+            })
+            .then(handleAuthResponse)
+            .then(() => {
+                loadVolunteerReports();
+                loadVolunteerStats();
+            })
+            .catch(err => alert(err.error || 'Failed to update status'));
+        }
+
+        // Forward a report to another organization (asks user to select org)
+        function forwardReport(reportId) {
+            // Fetch organizations list to present choices
+            apiFetch('messages.php?action=organizations')
+                .then(handleAuthResponse)
+                .then(data => {
+                    const orgs = data.organizations || [];
+                    if (!orgs.length) { alert('No organizations available to forward'); return; }
+                    const list = orgs.map(o => `${o.id}: ${o.name}`).join('\n');
+                    const input = prompt(`Enter the Organization ID to forward to:\n\n${list}`);
+                    const orgId = parseInt(input, 10);
+                    if (!orgId) return;
+                    apiFetch('reports.php', {
+                        method: 'PUT',
+                        body: JSON.stringify({ report_id: reportId, status: 'forwarded', organization_id: orgId })
+                    })
+                    .then(handleAuthResponse)
+                    .then(() => {
+                        alert('Report forwarded successfully');
+                        loadVolunteerReports();
+                        loadVolunteerStats();
+                    })
+                    .catch(err => alert(err.error || 'Failed to forward report'));
+                })
+                .catch(() => alert('Failed to load organizations'));
+        }
+        
+        // Load volunteer dashboard stats by computing from reports
+        function loadVolunteerStats() {
+            apiFetch('reports.php')
+                .then(handleAuthResponse)
+                .then(data => {
+                    const reports = data.reports || [];
+                    const totals = { pending: 0, accepted: 0, processing: 0, completed: 0, rescued: 0 };
+                    reports.forEach(r => {
+                        const s = (r.status || '').toLowerCase();
+                        if (s === 'pending') totals.pending++;
+                        else if (s === 'accepted') totals.accepted++;
+                        else if (s === 'processing') totals.processing++;
+                        else if (s === 'completed') totals.completed++;
+                        else if (s === 'rescued') totals.rescued++;
+                    });
+                    const total = reports.length || 0;
+                    const pending = totals.pending;
+                    const accepted = totals.accepted + totals.processing; // include processing
+                    const completed = totals.completed + totals.rescued; // count rescued as completed
+                    const responseRate = total ? Math.round((completed / total) * 100) : 0;
+                    document.getElementById('pendingReports').textContent = pending;
+                    document.getElementById('acceptedReports').textContent = accepted;
+                    document.getElementById('completedReports').textContent = completed;
+                    const rescuedEl = document.getElementById('rescuedReports');
+                    if (rescuedEl) rescuedEl.textContent = totals.rescued;
+                    document.getElementById('responseRate').textContent = responseRate + '%';
+                })
+                .catch(() => {
+                    document.getElementById('pendingReports').textContent = 0;
+                    document.getElementById('acceptedReports').textContent = 0;
+                    document.getElementById('completedReports').textContent = 0;
+                    const rescuedEl = document.getElementById('rescuedReports');
+                    if (rescuedEl) rescuedEl.textContent = 0;
+                    document.getElementById('responseRate').textContent = '0%';
+                });
+        }
+        
+        // Load donations table for volunteers (from API)
+        function loadDonationsTable() {
+            donationsTableBody.innerHTML = '';
+            apiFetch('donations.php')
+                .then(handleAuthResponse)
+                .then(data => {
+                    (data.donations || []).forEach((donation, idx) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${idx + 1}</td>
+                            <td>${donation.name}</td>
+                            <td>${donation.email}</td>
+                            <td>${donation.mobile||''}</td>
+                            <td>${donation.blood_group}</td>
+                            <td>${donation.date}</td>
+                        `;
+                        donationsTableBody.appendChild(row);
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+        
+        // Load organizations for volunteer dashboard (from API)
+        function loadOrganizations() {
+            const organizationsList = document.querySelector('.organizations-list');
+            const messageOrganizationsList = document.getElementById('messageOrganizationsList');
+            organizationsList.innerHTML = '';
+            messageOrganizationsList.innerHTML = '';
+            apiFetch('messages.php?action=organizations')
+                .then(handleAuthResponse)
+                .then(data => {
+                    (data.organizations || [])
+                        .filter(org => !currentUser || !currentUser.organization || org.name !== currentUser.organization)
+                        .forEach(org => {
+                        const initial = (org.name || '').charAt(0).toUpperCase();
+                        const orgItem = document.createElement('div');
+                        orgItem.className = 'organization-item';
+                        let desc = org.description || '';
+                        let email = '';
+                        let phone = '';
+                        try {
+                            const ci = org.contact_info ? JSON.parse(org.contact_info) : {};
+                            email = ci && ci.email ? ci.email : '';
+                            phone = ci && ci.phone ? ci.phone : '';
+                        } catch(_) {}
+                        const addr = org.address || '';
+                        const contact = [phone, email].filter(Boolean).join(' / ');
+                        const meta2 = [addr, contact].filter(Boolean).join(' · ');
+                        orgItem.innerHTML = `
+                            <div class="org-avatar">${initial}</div>
+                            <div>
+                                <h4>${org.name}</h4>
+                                <p style="color: var(--medium-gray); font-size: 0.92rem;">${desc || '&nbsp;'}</p>
+                                <p style="color: var(--medium-gray); font-size: 0.9rem;">${meta2 || '&nbsp;'}</p>
+                            </div>
+                        `;
+                        organizationsList.appendChild(orgItem);
+
+                        const messageOrgItem = document.createElement('div');
+                        messageOrgItem.className = 'organization-item';
+                        messageOrgItem.dataset.orgId = org.id;
+                        messageOrgItem.innerHTML = `
+                            <div class="org-avatar">${initial}</div>
+                            <div>
+                                <h4>${org.name}</h4>
+                                <p>&nbsp;</p>
+                            </div>
+                        `;
+                        messageOrgItem.addEventListener('click', () => openChat(org.id, org.name));
+                        messageOrganizationsList.appendChild(messageOrgItem);
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+        
+        // Switch tabs in volunteer dashboard
+        function switchTab(tabName) {
+            // Update active tab
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update active tab content
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}Tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            // Load donations table if donations tab is selected
+            if (tabName === 'donations') loadDonationsTable();
+            if (tabName === 'reports') loadVolunteerReports();
+            if (tabName === 'organizations') loadOrganizations();
+        }
+        
+        // Open chat with organization
+        function openChat(orgId, orgName) {
+            document.getElementById('chatHeader').textContent = orgName;
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendMessageBtn').disabled = false;
+            currentChatOrgId = orgId;
+            
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            apiFetch(`messages.php?action=messages&organization_id=${encodeURIComponent(orgId)}`)
+                .then(handleAuthResponse)
+                .then(data => {
+                    (data.messages || []).forEach(msg => {
+                        const row = document.createElement('div');
+                        const cls = msg.sender === 'sent' ? 'sent-message' : 'received-message';
+                        row.className = `chat-row ${cls}`;
+                        row.innerHTML = `
+                            <div class="bubble">
+                                <div class="text">${msg.message}</div>
+                                <div class="time">${msg.time}</div>
+                            </div>`;
+                        chatMessages.appendChild(row);
+                    });
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                })
+                .catch(err => console.error(err));
+            
+            // Scroll to bottom of chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Start polling for new messages
+            if (messagePollInterval) clearInterval(messagePollInterval);
+            messagePollInterval = setInterval(() => reloadChat(orgId), 3000);
+        }
+
+        function reloadChat(orgId) {
+            if (!orgId || orgId !== currentChatOrgId) return;
+            const chatMessages = document.getElementById('chatMessages');
+            apiFetch(`messages.php?action=messages&organization_id=${encodeURIComponent(orgId)}`)
+                .then(handleAuthResponse)
+                .then(data => {
+                    chatMessages.innerHTML = '';
+                    (data.messages || []).forEach(msg => {
+                        const row = document.createElement('div');
+                        const cls = msg.sender === 'sent' ? 'sent-message' : 'received-message';
+                        row.className = `chat-row ${cls}`;
+                        row.innerHTML = `
+                            <div class="bubble">
+                                <div class="text">${msg.message}</div>
+                                <div class="time">${msg.time}</div>
+                            </div>`;
+                        chatMessages.appendChild(row);
+                    });
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                })
+                .catch(() => {});
+        }
+
+        // Send chat message
+        document.addEventListener('DOMContentLoaded', () => {
+            const send = () => {
+                const input = document.getElementById('messageInput');
+                const text = input.value.trim();
+                if (!text || !currentChatOrgId) return;
+                apiFetch('messages.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ organization_id: currentChatOrgId, message: text })
+                })
+                .then(handleAuthResponse)
+                .then(() => {
+                    input.value = '';
+                    reloadChat(currentChatOrgId);
+                })
+                .catch(err => alert(err.error || 'Failed to send message'));
+            };
+            document.getElementById('sendMessageBtn').addEventListener('click', send);
+            document.getElementById('messageInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                }
+            });
+        });
+        
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
